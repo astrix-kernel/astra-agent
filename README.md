@@ -12,7 +12,7 @@ This repository is an active foundation for self-hosted deployment. Mock mode is
 git clone https://github.com/astrix-kernel/astra-agent.git
 cd astra-agent
 npm install
-npm run build --workspaces
+npm run build 
 cp .env.example .env
 npm run dev --workspace=@astra/api
 # in another terminal
