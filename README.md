@@ -8,6 +8,7 @@ This repository is an active foundation for self-hosted deployment. Mock mode is
 
 ## Quick start
 
+```bash
 git clone https://github.com/astrix-kernel/astra-agent.git
 cd astra-agent
 npm install
