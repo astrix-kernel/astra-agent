@@ -73,7 +73,11 @@ export class AgentRuntime {
         let result = await this.tools.execute(call.name, input, context);
         if (!result.success) {
           task.failedToolCalls += 1;
-          task.lastError = result.error;
+          if (result.error !== undefined) {
+            task.lastError = result.error;
+          } else {
+            delete task.lastError;
+          }
           yield { type: 'tool_result', task: { ...task }, tool: call.name, result };
           messages.push(createMessage('tool', JSON.stringify({ ...result, recoveryInstruction: 'Inspect the exact error, adjust only the input or approach justified by evidence, and retry at most once.' }), { toolCallId: call.id, name: call.name }));
           continue;
