@@ -2,6 +2,37 @@ import type { ChatEvent, ChatRequest, ChatResponse, ProviderError } from '../typ
 import type { Message} from '../types/messages.js';
 import { textContentOf } from '../types/messages.js';
 
+function toOpenAIMessages(messages: any[]): any[] {
+  return messages.map((msg) => {
+    // Pesan hasil tool: wajib ada tool_call_id
+    if (msg.role === 'tool') {
+      return {
+        role: 'tool',
+        tool_call_id: msg.toolCallId,
+        ...(msg.name ? { name: msg.name } : {}),
+        content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
+      };
+    }
+    // Pesan assistant yang meminta tool call
+    if (msg.role === 'assistant' && msg.toolCalls?.length) {
+      return {
+        role: 'assistant',
+        content: typeof msg.content === 'string' ? msg.content : '',
+        tool_calls: msg.toolCalls.map((call: any) => ({
+          id: call.id,
+          type: 'function',
+          function: { name: call.name, arguments: call.arguments },
+        })),
+      };
+    }
+    // Pesan biasa (system / user / assistant teks)
+    return {
+      role: msg.role,
+      content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
+    };
+  });
+}
+
 export interface ModelProvider {
   readonly id: string;
   readonly name: string;
@@ -77,7 +108,7 @@ class OpenAICompatibleProvider implements ModelProvider {
       headers: { Authorization: `Bearer ${this.config.apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: request.modelId ?? this.config.modelId,
-        messages: request.messages,
+        messages: toOpenAIMessages(request.messages),
         tools: request.tools,
         tool_choice: request.toolChoice,
         temperature: request.temperature,
@@ -106,6 +137,7 @@ class OpenAICompatibleProvider implements ModelProvider {
           const data = line.replace(/^data:\s*/, '').trim();
           if (!data || data === '[DONE]') continue;
           try {
+            if (!data || data.trim() === '[DONE]' || data.trim() === '') continue;
             const parsed = JSON.parse(data) as { choices?: { delta?: { content?: string; tool_calls?: { id?: string; function?: { name?: string; arguments?: string } }[] }; finish_reason?: string }[]; usage?: ChatResponse['usage'] };
             const choice = parsed.choices?.[0];
             const text = choice?.delta?.content;
