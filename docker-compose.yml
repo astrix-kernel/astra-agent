@@ -1,0 +1,20 @@
+services:
+  astra-api:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      ASTRA_API_KEY: ${ASTRA_API_KEY:-}
+      ASTRA_MODEL: ${ASTRA_MODEL:-auto/best-coding-fast}
+      ASTRA_BASE_URL: ${ASTRA_BASE_URL:-https://api.openai.com/v1}
+      ASTRA_API_PORT: 8787
+    restart: unless-stopped
+  astra-web:
+    build:
+      context: ./packages/web
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - astra-api
+    restart: unless-stopped

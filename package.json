@@ -1,0 +1,44 @@
+{
+  "name": "astra-agent-ai",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"", 
+    "dev:all": "concurrently \"npm run dev:core\" \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:cli\"", 
+    "dev:core": "npm run dev --workspace=@astra/core",
+    "dev:api": "npm run dev --workspace=@astra/api",
+    "dev:web": "npm run dev --workspace=@astra/web",
+    "dev:cli": "npm run dev --workspace=@astra/cli",
+    "build": "npm run build --workspaces",
+    "build:core": "npm run build --workspace=@astra/core",
+    "build:api": "npm run build --workspace=@astra/api",
+    "build:web": "npm run build --workspace=@astra/web",
+    "build:cli": "npm run build --workspace=@astra/cli",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "db:migrate": "npm run db:migrate --workspace=@astra/api",
+    "db:studio": "npm run db:studio --workspace=@astra/api",
+    "cli": "npm run start --workspace=@astra/cli",
+    "astra": "node packages/cli/dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@10.2.0"
+}
