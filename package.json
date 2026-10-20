@@ -6,13 +6,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"", 
-    "dev:all": "concurrently \"npm run dev:core\" \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:cli\"", 
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:all": "concurrently \"npm run dev:core\" \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:cli\"",
     "dev:core": "npm run dev --workspace=@astra/core",
     "dev:api": "npm run dev --workspace=@astra/api",
     "dev:web": "npm run dev --workspace=@astra/web",
     "dev:cli": "npm run dev --workspace=@astra/cli",
-    "build": "npm run build --workspaces",
+    "build": "npm run build:core && npm run build:api && npm run build:cli && npm run build:web",
     "build:core": "npm run build --workspace=@astra/core",
     "build:api": "npm run build --workspace=@astra/api",
     "build:web": "npm run build --workspace=@astra/web",
