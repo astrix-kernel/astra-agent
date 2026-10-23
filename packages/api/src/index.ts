@@ -81,7 +81,7 @@ app.get('/api/customization/connectors', async () => ({ items: connectors }));
 app.get('/api/customization/plugins', async () => ({ items: plugins }));
 const activeRuntimes = new Map<string, AgentRuntime>();
 
-app.post<{ Body: { message?: string; workspaceRoot?: string; allowWrite?: boolean; allowDelete?: boolean; modelId?: string; providerId?: string; mode?: 'chat' | 'code' | 'research'; executionMode?: ExecutionMode; provider?: RuntimeConfig } }>('/api/tasks', async (request, reply) => {
+app.post<{ Body: { message?: string; workspaceRoot?: string; allowWrite?: boolean; allowDelete?: boolean; modelId?: string; providerId?: string; mode?: 'chat' | 'code' | 'research' | 'self-heal'; executionMode?: ExecutionMode; provider?: RuntimeConfig } }>('/api/tasks', async (request, reply) => {
   try {
     const message = request.body?.message?.trim();
     if (!message) return reply.code(400).send({ error: 'message is required' });
@@ -93,7 +93,7 @@ app.post<{ Body: { message?: string; workspaceRoot?: string; allowWrite?: boolea
     const executionMode = request.body.executionMode ?? 'suggest';
     const permissions = {
       allowWrite: executionMode !== 'suggest' || request.body.allowWrite === true,
-      allowCommands: executionMode === 'autonomous' ? ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'] : ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'],
+      allowCommands: (request.body.mode === 'self-heal' || executionMode === 'autonomous') ? ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'] : ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'],
       allowDelete: executionMode === 'autonomous' || request.body.allowDelete === true,
     };
     const controller = new AbortController();

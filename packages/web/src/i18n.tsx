@@ -53,7 +53,10 @@ const translations: Record<Language, Record<string, string>> = {
     "Built-in": "Bawaan", "Featured skill": "Skill Unggulan", "Search": "Cari", "No": "Tidak ada", "match this view.": "yang cocok dengan tampilan ini.",
     "Name": "Nama", "Try": "Coba", "Added": "Ditambahkan", "Configure": "Konfigurasi", "Retry": "Coba lagi",
     "Import skill folder": "Impor folder skill", "Create custom skill": "Buat skill kustom", "Import plugin": "Impor plugin",
-    "Loading catalog…": "Memuat katalog..."
+    "Loading catalog…": "Memuat katalog...",
+    "Self-Heal": "Perbaikan Mandiri", "Fix internal compilation errors automatically.": "Perbaiki error kompilasi internal secara otomatis.",
+    "Chat": "Obrolan", "Research": "Riset", "General conversation and assistance.": "Percakapan umum dan bantuan.",
+    "Inspect and modify workspace code.": "Periksa dan modifikasi kode workspace.", "Analyze context and compare options.": "Analisis konteks dan bandingkan opsi."
   },
   zh: {
     "New chat": "新对话", "Search conversations": "搜索对话", "Projects": "项目", "Artifacts": "产物", "Code": "代码",
@@ -96,7 +99,10 @@ const translations: Record<Language, Record<string, string>> = {
     "Built-in": "内置", "Featured skill": "精选技能", "Search": "搜索", "No": "没有", "match this view.": "匹配此视图。",
     "Name": "名称", "Try": "尝试", "Added": "已添加", "Configure": "配置", "Retry": "重试",
     "Import skill folder": "导入技能文件夹", "Create custom skill": "创建自定义技能", "Import plugin": "导入插件",
-    "Loading catalog…": "正在加载目录..."
+    "Loading catalog…": "正在加载目录...",
+    "Self-Heal": "自我修复", "Fix internal compilation errors automatically.": "自动修复内部编译错误。",
+    "Chat": "聊天", "Research": "研究", "General conversation and assistance.": "一般对话和协助。",
+    "Inspect and modify workspace code.": "检查和修改工作区代码。", "Analyze context and compare options.": "分析上下文并比较选项。"
   },
   ja: {
     "New chat": "新しいチャット", "Search conversations": "会話を検索", "Projects": "プロジェクト", "Artifacts": "アーティファクト",
@@ -140,7 +146,10 @@ const translations: Record<Language, Record<string, string>> = {
     "Built-in": "組み込み", "Featured skill": "注目のスキル", "Search": "検索", "No": "該当なし", "match this view.": "このビューに一致します。",
     "Name": "名前", "Try": "試す", "Added": "追加済み", "Configure": "設定", "Retry": "再試行",
     "Import skill folder": "スキルフォルダをインポート", "Create custom skill": "カスタムスキルを作成", "Import plugin": "プラグインをインポート",
-    "Loading catalog…": "カタログを読み込み中..."
+    "Loading catalog…": "カタログを読み込み中...",
+    "Self-Heal": "自己修復", "Fix internal compilation errors automatically.": "内部のコンパイルエラーを自動的に修正します。",
+    "Chat": "チャット", "Research": "リサーチ", "General conversation and assistance.": "一般的な会話とアシスタンス。",
+    "Inspect and modify workspace code.": "ワークスペースのコードを検査および変更します。", "Analyze context and compare options.": "コンテキストを分析し、オプションを比較します。"
   }
 };
 

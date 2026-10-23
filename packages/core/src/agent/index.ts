@@ -32,7 +32,7 @@ export type TaskState = 'idle' | 'understanding' | 'planning' | 'waiting_for_app
 export interface AgentLimits { maxIterations: number; maxToolCalls: number; maxTimeMs: number; }
 export interface AgentTask { id: string; state: TaskState; iterations: number; toolCalls: number; startedAt: number; failedToolCalls: number; lastError?: string; }
 export interface AgentEvent { type: 'state' | 'text' | 'tool_start' | 'tool_result' | 'error' | 'done' | 'checkpoint' | 'diff'; task: AgentTask; text?: string; tool?: string; result?: unknown; error?: string; diff?: string; checkpointId?: string; }
-export interface AgentRunOptions { workspaceRoot: string; permissions?: PermissionSet; limits?: Partial<AgentLimits>; signal?: AbortSignal; executionMode?: ExecutionMode; mode?: 'chat' | 'code' | 'research' | undefined; }
+export interface AgentRunOptions { workspaceRoot: string; permissions?: PermissionSet; limits?: Partial<AgentLimits>; signal?: AbortSignal; executionMode?: ExecutionMode; mode?: 'chat' | 'code' | 'research' | 'self-heal' | undefined; }
 export interface Checkpoint { id: string; taskId: string; timestamp: number; files: Map<string, string>; message: string; }
 export interface FileChange { path: string; type: 'created' | 'modified' | 'deleted' | 'moved'; oldContent?: string; newContent?: string; diff?: string; }
 
@@ -150,7 +150,9 @@ export class AgentRuntime {
 
     let taskIntent: TaskIntent = 'workspace_inspection';
 
-    if (agentMode === 'research' || agentMode === 'chat') {
+    if (agentMode === 'self-heal') {
+      taskIntent = 'workspace_change'; // Paksa mode coding
+    } else if (agentMode === 'research' || agentMode === 'chat') {
       // Bypass classifier for Research & Chat mode (do not treat this as a coding task)
       taskIntent = 'conversation';
     } else if (this.provider.id === 'mock') {
@@ -259,6 +261,13 @@ export class AgentRuntime {
       modeInstruction = `\n\nMODE: RESEARCH. You are a web researcher. Follow this tool priority: (1) 'wikipedia_search' for encyclopedic/factual topics, (2) 'duckduckgo_search' for general web/news, (3) 'reddit_search' only if the first two fail. After gathering information, ALWAYS use 'save_to_brain' to store findings in long-term memory. Do NOT modify workspace files unless explicitly asked.`;
     } else if (agentMode === 'chat') {
       modeInstruction = `\n\nMODE: CHAT. Converse with the user. If you learn a new fact, use 'save_to_brain' to remember it.`;
+    } else if (agentMode === 'self-heal') {
+      modeInstruction = `\n\nMODE: SELF-HEAL. You are Astra's internal doctor. Your ONLY job is to fix compilation and test errors in your own codebase.
+      1. Use 'terminal_execute' to run "npm run build -w packages/core" and "npm run build -w packages/web".
+      2. If the command fails, READ the TypeScript error carefully.
+      3. Use 'fs_read' to inspect the broken file, then use 'fs_patch' or 'fs_write' to fix the syntax error.
+      4. Run the build again to verify your fix.
+      5. Repeat until the build passes with 0 errors. Do NOT touch unrelated files. Do NOT refactor working code.`;
     } else if (agentMode === 'code') {
       modeInstruction = `\n\nMODE: CODE. You are an expert programmer. Inspect files, modify code, and verify results.`;
     }
