@@ -5,3 +5,4 @@ export * from './tools/index.js';
 export * from './agent/index.js';
 export * from './skills/index.js';
 export * from './context/index.js';
+export * from './companion/index.js';

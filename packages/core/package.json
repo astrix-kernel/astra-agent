@@ -1,6 +1,7 @@
 {
   "name": "@astra/core",
   "version": "0.1.0",
+  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -31,6 +32,10 @@
     "./observability": {
       "import": "./dist/observability/index.js",
       "types": "./dist/observability/index.d.ts"
+    },
+    "./companion": {
+      "import": "./dist/companion/index.js",
+      "types": "./dist/companion/index.d.ts"
     }
   },
   "scripts": {

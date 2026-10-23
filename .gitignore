@@ -9,3 +9,16 @@ npm-debug.log*
 .env.local
 .DS_Store
 Thumbs.db
+
+# Proprietary character artwork (Aemeath / Wuthering Waves) is not redistributed.
+# Generate locally with scripts/prepare_companion_assets.py
+packages/web/public/assets/companion/**
+!packages/web/public/assets/companion/**/.gitkeep
+!packages/web/public/assets/companion/**/ASSETS.md
+
+# Local backups & temp files
+*.bak
+*.bak.*
+.astra/
+hello-world.txt
+*.code-workspace

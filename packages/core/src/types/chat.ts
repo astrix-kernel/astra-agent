@@ -26,7 +26,7 @@ export interface ChatRequest {
 
 /** A single streamed event emitted by a provider. */
 export interface ChatEvent {
-  type: 'token' | 'tool_call' | 'tool_call_delta' | 'error' | 'done' | 'usage';
+  type: 'token' | 'reasoning' | 'tool_call' | 'tool_call_delta' | 'error' | 'done' | 'usage';
   /** Text delta for 'token' events. */
   text?: string;
   /** Partial tool call for 'tool_call' / 'tool_call_delta'. */
