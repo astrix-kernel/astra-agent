@@ -100,7 +100,7 @@ app.post<{ Body: { message?: string; workspaceRoot?: string; allowWrite?: boolea
     const timer = setTimeout(() => controller.abort(), 1_200_000);
     let taskId = '';
     try {
-      for await (const event of runtime.run(`${message}${modeInstruction}`, [], { workspaceRoot: workspaceRoot(request.body.workspaceRoot), signal: controller.signal, permissions, executionMode })) {
+      for await (const event of runtime.run(`${message}${modeInstruction}`, [], { workspaceRoot: workspaceRoot(request.body.workspaceRoot), signal: controller.signal, permissions, executionMode, mode: request.body.mode ?? 'chat' })) {
         events.push(event);
         if (event.type === 'state' && event.task.state === 'idle') taskId = event.task.id;
       }
