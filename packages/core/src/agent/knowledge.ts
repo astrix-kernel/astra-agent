@@ -26,6 +26,25 @@ export class KnowledgeBase {
   }
 
   async save(topic: string, content: string, source: string) {
+    // Cek apakah topik ini udah pernah disimpen
+    const existingIndex = this.entries.findIndex(e => e.topic.toLowerCase() === topic.toLowerCase());
+    
+    if (existingIndex !== -1) {
+      // Kalau udah ada, cuma update isinya (biar gak duplikat)
+      const existing = this.entries[existingIndex] as KnowledgeEntry;
+      const updatedEntry: KnowledgeEntry = {
+        id: existing.id,
+        topic: existing.topic,
+        content,
+        source,
+        timestamp: Date.now()
+      };
+      this.entries[existingIndex] = updatedEntry;
+      await fs.writeFile(DB_PATH, JSON.stringify(this.entries, null, 2));
+      return updatedEntry;
+    }
+
+    // Kalau belum ada, bikin baru
     const newEntry: KnowledgeEntry = {
       id: randomUUID(),
       topic,

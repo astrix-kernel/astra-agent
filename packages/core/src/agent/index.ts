@@ -256,7 +256,7 @@ export class AgentRuntime {
     
     let modeInstruction = '';
     if (agentMode === 'research') {
-      modeInstruction = `\n\nMODE: RESEARCH. You are a web researcher. Use 'reddit_search' to find information on the internet. Use 'save_to_brain' to store important findings into long-term memory. Do NOT modify workspace files unless explicitly asked.`;
+      modeInstruction = `\n\nMODE: RESEARCH. You are a web researcher. Follow this tool priority: (1) 'wikipedia_search' for encyclopedic/factual topics, (2) 'duckduckgo_search' for general web/news, (3) 'reddit_search' only if the first two fail. After gathering information, ALWAYS use 'save_to_brain' to store findings in long-term memory. Do NOT modify workspace files unless explicitly asked.`;
     } else if (agentMode === 'chat') {
       modeInstruction = `\n\nMODE: CHAT. Converse with the user. If you learn a new fact, use 'save_to_brain' to remember it.`;
     } else if (agentMode === 'code') {
