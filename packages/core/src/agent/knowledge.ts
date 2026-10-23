@@ -26,11 +26,11 @@ export class KnowledgeBase {
   }
 
   async save(topic: string, content: string, source: string) {
-    // Cek apakah topik ini udah pernah disimpen
+    // Check if this topic has been saved before
     const existingIndex = this.entries.findIndex(e => e.topic.toLowerCase() === topic.toLowerCase());
     
     if (existingIndex !== -1) {
-      // Kalau udah ada, cuma update isinya (biar gak duplikat)
+      // If it exists, just update its content (to prevent duplicates)
       const existing = this.entries[existingIndex] as KnowledgeEntry;
       const updatedEntry: KnowledgeEntry = {
         id: existing.id,
@@ -44,7 +44,7 @@ export class KnowledgeBase {
       return updatedEntry;
     }
 
-    // Kalau belum ada, bikin baru
+    // If it doesn't exist, create a new one
     const newEntry: KnowledgeEntry = {
       id: randomUUID(),
       topic,

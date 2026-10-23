@@ -151,7 +151,7 @@ export class AgentRuntime {
     let taskIntent: TaskIntent = 'workspace_inspection';
 
     if (agentMode === 'research' || agentMode === 'chat') {
-      // Bypass classifier untuk mode Research & Chat (jangan anggap ini tugas coding)
+      // Bypass classifier for Research & Chat mode (do not treat this as a coding task)
       taskIntent = 'conversation';
     } else if (this.provider.id === 'mock') {
       taskIntent = 'conversation';
