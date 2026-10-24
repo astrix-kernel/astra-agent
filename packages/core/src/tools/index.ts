@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { mathTools } from './math.js';
 import { systemsTools } from './systems.js';
 import { aiTools } from './ai.js';
+import { gpuTools } from './gpu.js';
+import { webResearchTools } from './web_research.js';
 
 const execFileAsync = promisify(execFile);
 export interface ToolContext { workspaceRoot: string; signal?: AbortSignal; permissions: PermissionSet; }
@@ -110,6 +112,14 @@ export function createDefaultToolRegistry(): ToolRegistry {
   }
   
   for (const tool of aiTools) {
+    registry.register(tool);
+  }
+  
+  for (const tool of gpuTools) {
+    registry.register(tool);
+  }
+  
+  for (const tool of webResearchTools) {
     registry.register(tool);
   }
   

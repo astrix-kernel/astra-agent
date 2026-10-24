@@ -88,19 +88,19 @@ app.post<{ Body: { message?: string; workspaceRoot?: string; allowWrite?: boolea
     const events: unknown[] = [];
     const startedAt = Date.now();
     const providerConfig = request.body.providerId ? customProviders.get(request.body.providerId) : request.body.provider;
-    const modeInstruction = request.body.mode ? `\n\nAstra mode: ${request.body.mode}. Adapt your response and tool usage to this mode.` : '';
+    const mode = request.body.mode ?? 'code';
     const runtime = createRuntime({ ...providerConfig, ...(request.body.modelId ? { modelId: request.body.modelId } : {}) });
     const executionMode = request.body.executionMode ?? 'suggest';
     const permissions = {
       allowWrite: executionMode !== 'suggest' || request.body.allowWrite === true,
-      allowCommands: (request.body.mode === 'self-heal' || executionMode === 'autonomous') ? ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'] : ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'],
+      allowCommands: (mode === 'self-heal' || executionMode === 'autonomous') ? ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'pip', 'pip3', 'cat', 'ls', 'dir', 'head', 'tail', 'grep', 'wc', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'] : ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'pip', 'pip3', 'cat', 'ls', 'dir', 'head', 'tail', 'grep', 'wc', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'],
       allowDelete: executionMode === 'autonomous' || request.body.allowDelete === true,
     };
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 1_200_000);
     let taskId = '';
     try {
-      for await (const event of runtime.run(`${message}${modeInstruction}`, [], { workspaceRoot: workspaceRoot(request.body.workspaceRoot), signal: controller.signal, permissions, executionMode, mode: request.body.mode ?? 'chat' })) {
+      for await (const event of runtime.run(message, [], { workspaceRoot: workspaceRoot(request.body.workspaceRoot), signal: controller.signal, permissions, executionMode, mode })) {
         events.push(event);
         if (event.type === 'state' && event.task.state === 'idle') taskId = event.task.id;
       }
@@ -177,7 +177,7 @@ app.post<{ Body: { message?: string; modelId?: string; providerId?: string; work
     const sessionNote = request.body.sessionSummary ? `\n\nWhat has happened in this session so far: ${request.body.sessionSummary}` : '';
     const events: unknown[] = [];
     const startedAt = Date.now();
-    for await (const event of createRuntime({ ...providerConfig, ...(request.body.modelId ? { modelId: request.body.modelId } : {}) }).run(`${persona}${contextNote}${memoryNote}${sessionNote}\n\n${message}`, history, { workspaceRoot: companionRoot, permissions: { allowWrite: false, allowCommands: [] } })) events.push(event);
+    for await (const event of createRuntime({ ...providerConfig, ...(request.body.modelId ? { modelId: request.body.modelId } : {}) }).run(`${persona}${contextNote}${memoryNote}${sessionNote}\n\n${message}`, history, { workspaceRoot: companionRoot, permissions: { allowWrite: false, allowCommands: ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'pip', 'pip3', 'cat', 'ls', 'dir', 'head', 'tail', 'grep', 'wc', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'] } })) events.push(event);
     return { events, durationMs: Date.now() - startedAt };
   } catch (error) {
     console.error('COMPANION CHAT ERROR:', error);
@@ -194,7 +194,7 @@ app.post<{ Body: { tool?: string; input?: Record<string, unknown>; workspaceId?:
     const registry = createDefaultToolRegistry();
     const readOnly = new Set(['fs.read', 'fs.list', 'code.grep', 'code.search', 'verify.run']);
     if (!readOnly.has(tool)) return reply.code(400).send({ error: `Tool ${tool} is not available to the companion` });
-    const result = await registry.execute(tool, request.body.input ?? {}, { workspaceRoot: root, permissions: { allowWrite: false, allowCommands: [] } });
+    const result = await registry.execute(tool, request.body.input ?? {}, { workspaceRoot: root, permissions: { allowWrite: false, allowCommands: ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'pip', 'pip3', 'cat', 'ls', 'dir', 'head', 'tail', 'grep', 'wc', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'] } });
     if (!result.success) return reply.code(400).send({ error: result.error ?? 'tool failed' });
     return { tool, output: result.output };
   } catch (error) {
@@ -203,5 +203,5 @@ app.post<{ Body: { tool?: string; input?: Record<string, unknown>; workspaceId?:
   }
 });
 app.get('/ws', { websocket: true }, connection => { const socket = connection.socket; socket.on('message', async (raw: Buffer) => { try { const request = JSON.parse(raw.toString()) as { message?: string; workspaceRoot?: string; allowWrite?: boolean; modelId?: string; providerId?: string; provider?: RuntimeConfig }; if (!request.message) { socket.send(JSON.stringify({ type: 'error', error: 'message is required' })); return; } const providerConfig = request.providerId ? customProviders.get(request.providerId) : request.provider;
-      for await (const event of createRuntime({ ...providerConfig, ...(request.modelId ? { modelId: request.modelId } : {}) }).run(request.message, [], { workspaceRoot: workspaceRoot(request.workspaceRoot), permissions: { allowWrite: request.allowWrite === true, allowCommands: ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3'] } })) socket.send(JSON.stringify(event)); } catch (error) { socket.send(JSON.stringify({ type: 'error', error: error instanceof Error ? error.message : String(error) })); } }); });
+      for await (const event of createRuntime({ ...providerConfig, ...(request.modelId ? { modelId: request.modelId } : {}) }).run(request.message, [], { workspaceRoot: workspaceRoot(request.workspaceRoot), permissions: { allowWrite: request.allowWrite === true, allowCommands: ['git', 'node', 'npm', 'pnpm', 'yarn', 'python', 'python3', 'pip', 'pip3', 'cat', 'ls', 'dir', 'head', 'tail', 'grep', 'wc', 'npx', 'tsc', 'vitest', 'eslint', 'prettier', 'make', 'cmake', 'gcc', 'g++', 'cc', 'clang', 'clang++', 'cargo', 'rustc', 'go'] } })) socket.send(JSON.stringify(event)); } catch (error) { socket.send(JSON.stringify({ type: 'error', error: error instanceof Error ? error.message : String(error) })); } }); });
 const port = Number(process.env['ASTRA_API_PORT'] ?? 8787); await app.listen({ host: '0.0.0.0', port }); console.log(`Astra API listening on http://localhost:${port}`);

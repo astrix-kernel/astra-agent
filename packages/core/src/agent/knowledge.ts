@@ -57,6 +57,10 @@ export class KnowledgeBase {
     return newEntry;
   }
 
+  async recall(query: string): Promise<string> {
+    return this.search(query);
+  }
+
   search(query: string): string {
     const keywords = query.toLowerCase().split(' ').filter(w => w.length > 3);
     if (keywords.length === 0) return 'No specific keywords for memory search.';
