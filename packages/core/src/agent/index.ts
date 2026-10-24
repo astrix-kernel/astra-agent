@@ -8,6 +8,7 @@ import type { ToolRegistry, ToolContext, PermissionSet, ToolResult } from '../to
 import { astraBrain } from './knowledge.js';
 import { webResearchTools } from '../tools/web_research.js';
 import { kernelBrainTools } from '../tools/kernel_brain.js';
+import { webBrainTools } from '../tools/web_brain_tools.js';
 import { listBuiltinSkills, skillMetadataForPrompt } from '../skills/index.js';
 import { retrieveProjectContext } from '../context/index.js';
 import { InMemoryWorkingMemoryStore, createWorkingMemory, formatWorkingMemoryForPrompt, extractMemoryFromToolResult } from './memory.js';
@@ -390,14 +391,14 @@ export class AgentRuntime {
             : {}
         ),
         tools: (() => {
-          const allTools = [...new Map([...this.tools.list(), ...webResearchTools].map(t => [t.name, t])).values()];
+          const allTools = [...new Map([...this.tools.list(), ...webResearchTools, ...kernelBrainTools, ...webBrainTools].map(t => [t.name, t])).values()];
           const matches = (name: string, list: string[]) => {
             const dot = name.replace(/_/g, '.');
             const under = name.replace(/\./g, '_');
             return list.includes(name) || list.includes(dot) || list.includes(under);
           };
-          const codeTools = ['fs.read','fs.write','fs.patch','fs.delete','fs.mkdir','fs.move','fs.list','fs.stat','fs.diff','fs.grep','code.search','terminal.execute','verify.run'];
-          const researchTools = ['wikipedia_search','duckduckgo_search','reddit_search','github_search','arxiv_search','tech_docs_search','stackoverflow_search','save_to_brain','recall_from_brain','fs.read','fs.list'];
+          const codeTools = ['fs.read','fs.write','fs.patch','fs.delete','fs.mkdir','fs.move','fs.list','fs.stat','fs.diff','fs.grep','code.search','terminal.execute','verify.run','kernel_list_codebases','kernel_find_function','kernel_find_callers','kernel_find_callers_batch','kernel_find_callees','kernel_search','web_remember','web_recall','web_stats','web_list_categories'];
+          const researchTools = ['wikipedia_search','duckduckgo_search','reddit_search','github_search','arxiv_search','tech_docs_search','stackoverflow_search','save_to_brain','recall_from_brain','fs.read','fs.list','kernel_list_codebases','kernel_find_function','kernel_find_callers','kernel_find_callers_batch','kernel_find_callees','kernel_search','web_remember','web_recall','web_stats','web_list_categories'];
           if (agentMode === 'code' || agentMode === 'self-heal') {
             return allTools.filter(t => matches(t.name, codeTools));
           }
@@ -1011,7 +1012,7 @@ export class AgentRuntime {
         }
         
         let result: ToolResult;
-        const customTool = webResearchTools.find(t => t.name === call.name) ?? kernelBrainTools.find(t => t.name === call.name);
+        const customTool = webResearchTools.find(t => t.name === call.name) ?? kernelBrainTools.find(t => t.name === call.name) ?? webBrainTools.find(t => t.name === call.name);
         if (customTool) {
           result = await (customTool as { execute: (args: unknown) => Promise<ToolResult> }).execute(input);
         } else {

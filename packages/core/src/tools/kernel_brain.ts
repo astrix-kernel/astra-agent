@@ -72,8 +72,44 @@ export const kernelBrainTools: any[] = [
     }),
   },
   {
+    name: 'kernel_find_callers_batch',
+    description: 'Find callers for MULTIPLE functions in one call. Faster than calling kernel_find_callers repeatedly. Use this when you have a list of function names to check.',
+    schema: {
+      type: 'object',
+      properties: {
+        names: { type: 'array', items: { type: 'string' }, description: 'Array of function names' },
+        codebaseId: { type: 'string' },
+      },
+      required: ['names'],
+    },
+    execute: async (args: { names: string[]; codebaseId?: string }) => withSession(async (session) => {
+      const cbId = await resolveCodebaseId(session, args.codebaseId);
+      if (!cbId) return { success: false, error: 'No codebases indexed.' };
+      const r = await session.run(
+        `MATCH (caller:Function {codebaseId: $cbId})-[:CALLS]->(target:Function)
+         WHERE target.name IN $names
+         OPTIONAL MATCH (file:File)-[:DEFINES]->(caller)
+         RETURN DISTINCT target.name AS target, caller.name AS caller,
+                file.relativePath AS filePath, caller.line AS line
+         ORDER BY target, caller`,
+        { cbId, names: args.names }
+      );
+      const grouped: Record<string, any[]> = {};
+      for (const rec of r.records) {
+        const tgt = rec.get('target');
+        if (!grouped[tgt]) grouped[tgt] = [];
+        grouped[tgt].push({
+          caller: rec.get('caller'),
+          filePath: rec.get('filePath'),
+          line: rec.get('line'),
+        });
+      }
+      return { success: true, output: grouped };
+    }),
+  },
+  {
     name: 'kernel_find_callers',
-    description: 'Find all functions that call the given function in the kernel codebase.',
+    description: 'Find all functions that call the given function in the kernel codebase. For multiple names, use kernel_find_callers_batch instead.',
     schema: {
       type: 'object',
       properties: { name: { type: 'string' }, codebaseId: { type: 'string' } },
